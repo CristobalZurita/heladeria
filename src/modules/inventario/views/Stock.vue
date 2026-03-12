@@ -2,9 +2,11 @@
 
 import { ref } from "vue"
 import TablaStock from "../components/stock/tablaStock.vue"
-import { productos } from "../data/productos.js"
-import { alergenos } from "../data/alergenos.js"
-import { categoria } from "../data/categoria.js"
+import { productos } from "@/modules/inventario/data/productos.js"
+import { alergenos } from "@/modules/inventario/data/alergenos.js"
+import { categoria } from "@/modules/inventario/data/categoria.js"
+
+
 
 
 const stock = ref([...productos])

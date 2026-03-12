@@ -2,7 +2,7 @@
 
 <script setup>
 
-import Stock from "./views/Stock.vue"
+import Stock from "./modules/inventario/views/Stock.vue"
 
 </script>
 
