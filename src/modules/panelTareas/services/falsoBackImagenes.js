@@ -1,10 +1,12 @@
+import { imagenesDemo } from "../data/imagenesDemo.js"
+
 const STORAGE_KEY = "bosque_helado_imagenes"
 const ALMACEN_LOCAL_BASE = "almacen_local"
 
 function cargarDesdeStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : []
+    return raw === null ? null : JSON.parse(raw)
   } catch {
     return []
   }
@@ -12,6 +14,25 @@ function cargarDesdeStorage() {
 
 function guardarEnStorage(lista) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(lista))
+}
+
+function clonarLista(lista) {
+  return JSON.parse(JSON.stringify(lista))
+}
+
+function normalizarImagen(imagen) {
+  return {
+    id: String(imagen?.id || `${Date.now()}_${Math.random().toString(16).slice(2)}`),
+    nombre: String(imagen?.nombre || "imagen.jpg"),
+    tipo: String(imagen?.tipo || "image/jpeg"),
+    peso: Number(imagen?.peso || 0),
+    carpeta: String(imagen?.carpeta || "inventario"),
+    carpeta_cloudinary: String(imagen?.carpeta_cloudinary || construirCarpetaCloudinary(imagen?.carpeta)),
+    fecha: String(imagen?.fecha || new Date().toISOString()),
+    cloudinary_url: String(imagen?.cloudinary_url || ""),
+    thumbnail_url: String(imagen?.thumbnail_url || imagen?.cloudinary_url || ""),
+    public_id: imagen?.public_id ?? null
+  }
 }
 
 function leerComoDataUrl(archivo) {
@@ -74,11 +95,19 @@ export function getModoImagenes() {
 }
 
 export function listarImagenes() {
-  return cargarDesdeStorage()
+  const guardadas = cargarDesdeStorage()
+
+  if (Array.isArray(guardadas)) {
+    return guardadas.map((item) => normalizarImagen(item))
+  }
+
+  const demo = clonarLista(imagenesDemo).map((item) => normalizarImagen(item))
+  guardarEnStorage(demo)
+  return demo
 }
 
 export async function subirImagenes(archivos, carpeta) {
-  const actuales = cargarDesdeStorage()
+  const actuales = listarImagenes()
   const nuevas = []
   const destino = normalizarDestinoCarpeta(carpeta)
 
@@ -105,7 +134,7 @@ export async function subirImagenes(archivos, carpeta) {
 }
 
 export function eliminarImagen(id) {
-  const actual = cargarDesdeStorage()
+  const actual = listarImagenes()
   const actualizado = actual.filter((item) => item.id !== id)
   guardarEnStorage(actualizado)
   return actualizado

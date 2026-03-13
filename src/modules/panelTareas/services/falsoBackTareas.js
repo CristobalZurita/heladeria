@@ -1,3 +1,5 @@
+import { estadoTareasDemo } from "../data/estadoTareasDemo.js"
+
 const STORAGE_KEY = "bosque_helado_tareas"
 
 function cargarDesdeStorage() {
@@ -40,8 +42,32 @@ function normalizarEstado(estado) {
   }
 }
 
+function combinarTareas(baseGuardada, fallback) {
+  const guardado = normalizarEstado(baseGuardada)
+  const demo = normalizarEstado(fallback)
+  const nombresGuardados = new Set(
+    guardado.tareas.map((tarea) => tarea.nombre.toLowerCase())
+  )
+
+  const faltantes = demo.tareas.filter(
+    (tarea) => !nombresGuardados.has(tarea.nombre.toLowerCase())
+  )
+
+  return normalizarEstado({
+    diaActivo: guardado.diaActivo,
+    tareas: [...guardado.tareas, ...faltantes],
+    nextId: Math.max(guardado.nextId, demo.nextId, guardado.tareas.length + faltantes.length + 1)
+  })
+}
+
 export function listarEstadoTareas() {
-  return normalizarEstado(cargarDesdeStorage())
+  const guardado = cargarDesdeStorage()
+  const normalizado = guardado
+    ? combinarTareas(guardado, estadoTareasDemo)
+    : normalizarEstado(estadoTareasDemo)
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizado))
+  return normalizado
 }
 
 export function guardarEstadoTareas(estado) {

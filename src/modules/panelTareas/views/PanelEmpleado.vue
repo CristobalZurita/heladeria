@@ -49,10 +49,12 @@
       :tareas="tareas"
       :diaActivo="diaActivo"
       :totalProductos="totalProductos"
+      :totalRecetas="totalRecetas"
       :productosSinStock="productosSinStock"
       :productosConImagen="productosConImagen"
       :totalProveedores="totalProveedores"
       :totalImagenes="totalImagenes"
+      :imagenes="imagenes"
     />
   </div>
 
@@ -118,7 +120,8 @@ totalProductos: 0,
 productosSinStock: 0,
 productosConImagen: 0,
 totalProveedores: 0,
-totalImagenes: 0
+totalImagenes: 0,
+imagenes: []
 }
 },
 
@@ -218,6 +221,7 @@ this.productosSinStock = stock.filter(producto => Number(producto.stock) === 0).
 this.productosConImagen = stock.filter(producto => producto.thumbnail_url || producto.cloudinary_url).length
 this.totalProveedores = proveedores.length
 this.totalImagenes = imagenes.length
+this.imagenes = imagenes
 }
 
 }
@@ -229,10 +233,11 @@ this.totalImagenes = imagenes.length
 <style scoped>
 
 .panelEmpleado{
-padding:28px 32px;
+padding:24px 20px 28px;
 display:flex;
 flex-direction:column;
 gap:20px;
+width:100%;
 }
 
 .tituloPanelInterpolado{

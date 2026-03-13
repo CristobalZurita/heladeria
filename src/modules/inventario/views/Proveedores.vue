@@ -213,7 +213,8 @@ this.mostrarModal = false
 
 /* ── LAYOUT ── */
 .vistaProveedores{
-padding:28px 32px;
+padding:24px 20px 28px;
+width:100%;
 }
 
 /* ── HEADER ── */

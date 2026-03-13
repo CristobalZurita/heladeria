@@ -22,6 +22,23 @@ function guardarLista(key, lista) {
   return lista
 }
 
+function tieneValor(valor) {
+  if (Array.isArray(valor)) return valor.length > 0
+  if (typeof valor === "string") return valor.trim() !== ""
+  return valor !== undefined && valor !== null
+}
+
+function fusionarConFallback(actual, fallback) {
+  const combinado = { ...fallback }
+
+  Object.keys(actual).forEach((key) => {
+    const valorActual = actual[key]
+    combinado[key] = tieneValor(valorActual) ? valorActual : fallback[key]
+  })
+
+  return combinado
+}
+
 function normalizarProducto(producto) {
   const stock = Number(producto?.stock)
   const alergenos = Array.isArray(producto?.alergenos)
@@ -59,24 +76,40 @@ function combinarListasPorNombre(listaGuardada, fallback, normalizador) {
     ? listaGuardada.map((item) => normalizador(item)).filter((item) => item.nombre !== "")
     : []
 
-  const nombresGuardados = new Set(
-    guardadaNormalizada.map((item) => item.nombre.toLowerCase())
+  const fallbackNormalizada = clonarLista(fallback)
+    .map((item) => normalizador(item))
+    .filter((item) => item.nombre !== "")
+
+  const fallbackPorNombre = new Map(
+    fallbackNormalizada.map((item) => [item.nombre.toLowerCase(), item])
   )
 
-  const faltantes = clonarLista(fallback)
-    .map((item) => normalizador(item))
-    .filter((item) => item.nombre !== "" && !nombresGuardados.has(item.nombre.toLowerCase()))
+  const combinada = guardadaNormalizada.map((item) => {
+    const fallbackItem = fallbackPorNombre.get(item.nombre.toLowerCase())
+    return fallbackItem ? fusionarConFallback(item, fallbackItem) : item
+  })
 
-  return [...guardadaNormalizada, ...faltantes]
+  const nombresGuardados = new Set(
+    combinada.map((item) => item.nombre.toLowerCase())
+  )
+
+  const faltantes = fallbackNormalizada
+    .filter((item) => !nombresGuardados.has(item.nombre.toLowerCase()))
+
+  return [...combinada, ...faltantes]
 }
 
 function obtenerListaNormalizada(key, fallback, normalizador) {
   const guardada = cargarLista(key)
+  const guardadaNormalizada = Array.isArray(guardada)
+    ? guardada.map((item) => normalizador(item)).filter((item) => item.nombre !== "")
+    : []
+
   const normalizada = Array.isArray(guardada)
-    ? combinarListasPorNombre(guardada, fallback, normalizador)
+    ? combinarListasPorNombre(guardadaNormalizada, fallback, normalizador)
     : clonarLista(fallback).map((item) => normalizador(item)).filter((item) => item.nombre !== "")
 
-  if (!Array.isArray(guardada) || normalizada.length !== guardada.length) {
+  if (!Array.isArray(guardada) || JSON.stringify(normalizada) !== JSON.stringify(guardadaNormalizada)) {
     guardarLista(key, normalizada)
   }
 

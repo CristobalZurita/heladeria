@@ -61,7 +61,7 @@ color:white;
 padding:28px 16px;
 height:100%;
 min-height:100vh;
-width:200px;
+width:160px;
 flex-shrink:0;
 }
 
@@ -71,7 +71,7 @@ align-items:center;
 gap:10px;
 margin-bottom:36px;
 font-weight:700;
-font-size:15px;
+font-size:14px;
 color:#FFD166;
 }
 
@@ -87,7 +87,7 @@ cursor:pointer;
 padding:10px 12px;
 border-radius:8px;
 transition:0.2s;
-font-size:14px;
+font-size:13px;
 color:#c8edd9;
 }
 

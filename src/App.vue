@@ -10,22 +10,26 @@
 
     <!-- Panel principal -->
     <div class="mainPanel">
+      <div class="mainPanelShell">
 
-      <!-- Header -->
-      <HeaderPanel :heladero="usuario" @volverLanding="volverALanding" />
+        <!-- Header -->
+        <HeaderPanel :heladero="usuario" @volverLanding="volverALanding" />
 
-      <!-- Contenido dinámico según vista -->
-      <main class="contenido">
+        <!-- Contenido dinámico según vista -->
+        <main class="contenido">
+          <div class="contenidoShell">
 
-        <PanelEmpleado v-if="vistaActual === 'panel'" :usuario="usuario" vista="panel" />
-        <PanelEmpleado v-else-if="vistaActual === 'tareas'" :usuario="usuario" vista="tareas" />
-        <PanelEmpleado v-else-if="vistaActual === 'kpi'" :usuario="usuario" vista="kpi" />
-        <GestorImagenes v-else-if="vistaActual === 'imagenes'" />
-        <Stock        v-else-if="vistaActual === 'stock'" />
-        <Proveedores  v-else-if="vistaActual === 'proveedores'" />
+            <PanelEmpleado v-if="vistaActual === 'panel'" :usuario="usuario" vista="panel" />
+            <PanelEmpleado v-else-if="vistaActual === 'tareas'" :usuario="usuario" vista="tareas" />
+            <PanelEmpleado v-else-if="vistaActual === 'kpi'" :usuario="usuario" vista="kpi" />
+            <GestorImagenes v-else-if="vistaActual === 'imagenes'" />
+            <Stock        v-else-if="vistaActual === 'stock'" />
+            <Proveedores  v-else-if="vistaActual === 'proveedores'" />
 
-      </main>
+          </div>
+        </main>
 
+      </div>
     </div>
 
   </div>
@@ -98,6 +102,7 @@ color:#1a3d2e;
 
 :root{
 --site-max-width: calc(1640px + 40rem);
+--dashboard-max-width: calc(var(--site-max-width) + 40rem);
 --site-gutter-desktop: 36px;
 --site-gutter-mobile: 20px;
 }
@@ -117,12 +122,28 @@ flex:1;
 display:flex;
 flex-direction:column;
 overflow:hidden;
+min-width:0;
+padding:0 18px 18px 0;
+}
+
+.mainPanelShell{
+width:min(var(--dashboard-max-width, calc(1640px + 80rem)), 100%);
+min-width:0;
+margin:0 auto;
+display:flex;
+flex-direction:column;
+flex:1;
 }
 
 .contenido{
 flex:1;
 overflow-y:auto;
 background:#f4fdf8;
+border-radius:0 0 22px 22px;
+}
+
+.contenidoShell{
+width:100%;
 }
 
 /* ── SCROLLBAR ── */
@@ -141,6 +162,16 @@ border-radius:10px;
 
 ::-webkit-scrollbar-thumb:hover{
 background:#2d9e74;
+}
+
+@media (max-width: 720px){
+  .mainPanel{
+    padding:0;
+  }
+
+  .contenido{
+    border-radius:0;
+  }
 }
 
 </style>

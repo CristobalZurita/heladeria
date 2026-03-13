@@ -236,7 +236,8 @@ function eliminarProducto(producto) {
 
 <style scoped>
 .vistaStock {
-  padding: 28px 32px;
+  padding: 24px 20px 28px;
+  width: 100%;
 }
 
 .stockHeader {

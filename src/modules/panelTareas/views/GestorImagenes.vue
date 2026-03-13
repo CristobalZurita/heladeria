@@ -206,10 +206,11 @@ export default {
 
 <style scoped>
 .gestorImagenes {
-  padding: 28px 32px;
+  padding: 24px 20px 28px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
 }
 
 .headerGestor {

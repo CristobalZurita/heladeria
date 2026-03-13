@@ -53,9 +53,10 @@ LogoBosque
 display:flex;
 justify-content:space-between;
 align-items:center;
-padding:18px 28px;
+padding:18px 22px;
 background:linear-gradient(90deg,#1a6b52,#2d9e74);
 border-bottom:3px solid #FFD166;
+border-radius:0 0 18px 18px;
 }
 
 .infoHeladeria{
