@@ -11,17 +11,30 @@ function cargarDesdeStorage() {
   }
 }
 
+function normalizarEstadoTexto(tarea) {
+  const estado = String(tarea?.estado || "").trim().toLowerCase()
+  if (["pendiente", "en progreso", "completada"].includes(estado)) {
+    return estado
+  }
+  return tarea?.completada ? "completada" : "pendiente"
+}
+
 function normalizarTarea(tarea, index = 0) {
   const prioridad = ["baja", "media", "alta"].includes(tarea?.prioridad)
     ? tarea.prioridad
     : "media"
   const id = Number(tarea?.id)
+  const estado = normalizarEstadoTexto(tarea)
 
   return {
     id: Number.isFinite(id) && id > 0 ? id : index + 1,
     nombre: String(tarea?.nombre || "").trim(),
     prioridad,
-    completada: Boolean(tarea?.completada)
+    estado,
+    asignado: String(tarea?.asignado || "Valentina Torres").trim() || "Valentina Torres",
+    fechaInicio: String(tarea?.fechaInicio || "").trim(),
+    fechaEntrega: String(tarea?.fechaEntrega || "").trim(),
+    completada: estado === "completada"
   }
 }
 

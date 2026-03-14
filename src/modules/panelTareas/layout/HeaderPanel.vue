@@ -2,25 +2,25 @@
 
 <header class="header">
 
-<!-- IZQUIERDA -->
 <div class="infoHeladeria">
 
 <LogoBosque/>
 
 <div class="textoHeladeria">
 <h2>🍃 Bosque Helado</h2>
-<p>Panel de empleados</p>
+<p>{{ rol === "admin" ? "Panel de administración" : "Panel de empleados" }}</p>
 </div>
 
 </div>
 
-<!-- DERECHA -->
 <div class="infoUsuario">
 
 <button class="btnVolver" @click="$emit('volverLanding')">↩ Volver al landing</button>
+<button class="btnSwitch" @click="$emit('switchPerfil')">⇄ SWITCH</button>
+<button class="btnSesion" @click="$emit('cerrarSesion')">Salir</button>
 
 <div class="bloque">
-<span class="label">Empleado</span>
+<span class="label">{{ rol === "admin" ? "Administrador" : "Empleado" }}</span>
 <span class="usuario">🍦 {{ heladero }}</span>
 </div>
 
@@ -36,8 +36,8 @@ import LogoBosque from "./LogoBosque.vue"
 
 export default{
 
-props:["heladero"],
-emits:["volverLanding"],
+props:["heladero","rol"],
+emits:["volverLanding","switchPerfil","cerrarSesion"],
 
 components:{
 LogoBosque
@@ -81,13 +81,14 @@ color:#b6e8d3;
 .infoUsuario{
 display:flex;
 align-items:center;
-gap:25px;
+gap:12px;
+flex-wrap:wrap;
+justify-content:flex-end;
 }
 
-.btnVolver{
-border:1px solid rgba(255,255,255,0.45);
-background:rgba(255,255,255,0.12);
-color:white;
+.btnVolver,
+.btnSwitch,
+.btnSesion{
 padding:8px 14px;
 border-radius:10px;
 font-size:12px;
@@ -96,8 +97,34 @@ cursor:pointer;
 transition:0.2s;
 }
 
+.btnVolver{
+border:1px solid rgba(255,255,255,0.45);
+background:rgba(255,255,255,0.12);
+color:white;
+}
+
 .btnVolver:hover{
 background:rgba(255,255,255,0.2);
+}
+
+.btnSwitch{
+border:1px solid rgba(255,209,102,0.55);
+background:#FFD166;
+color:#194030;
+}
+
+.btnSwitch:hover{
+background:#ffe09a;
+}
+
+.btnSesion{
+border:1px solid rgba(255,255,255,0.38);
+background:rgba(10,36,28,0.18);
+color:#f4fdf8;
+}
+
+.btnSesion:hover{
+background:rgba(10,36,28,0.32);
 }
 
 .bloque{

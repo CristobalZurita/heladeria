@@ -137,6 +137,25 @@
             type="text"
             placeholder="Frambuesa, crema, crema vegana, leche..."
           />
+
+          <div v-if="productosBusquedaRapida.length" class="catalogQuickStrip">
+            <button
+              v-for="producto in productosBusquedaRapida"
+              :key="producto.nombre"
+              class="catalogQuickResult"
+              :class="{ isActive: productoActivo && productoActivo.nombre === producto.nombre }"
+              type="button"
+              @click="seleccionarProducto(producto.nombre)"
+            >
+              <img
+                class="catalogQuickThumb"
+                :src="producto.thumbnail_url || producto.cloudinary_url"
+                :alt="producto.nombre"
+                loading="lazy"
+              />
+              <span>{{ producto.nombre }}</span>
+            </button>
+          </div>
         </label>
 
         <div class="filterGroup">
@@ -192,10 +211,18 @@
 
       <article v-if="productoActivo" class="catalogSpotlight reveal-on-scroll">
         <div class="spotlightHeader">
-          <div>
+          <div class="spotlightCopy">
             <p class="miniEyebrow">Ficha rapida</p>
             <h3>{{ productoActivo.nombre }}</h3>
             <p>{{ productoActivoResumen }}</p>
+          </div>
+
+          <div class="spotlightMedia">
+            <img
+              :src="productoActivo.thumbnail_url || productoActivo.cloudinary_url"
+              :alt="productoActivo.nombre"
+              loading="lazy"
+            />
           </div>
 
           <div class="spotlightSummary">
@@ -243,6 +270,14 @@
           @focusin="seleccionarProducto(producto.nombre)"
           @click="seleccionarProducto(producto.nombre)"
         >
+          <div class="catalogMedia">
+            <img
+              :src="producto.thumbnail_url || producto.cloudinary_url"
+              :alt="producto.nombre"
+              loading="lazy"
+            />
+          </div>
+
           <div class="catalogCardHead">
             <p class="catalogCategory">{{ producto.categoria }}</p>
             <span class="stockBadge" :class="estadoStockClase(producto)">
@@ -779,6 +814,10 @@ export default {
 
         return coincideBusqueda && coincideCategoria && coincideReceta
       })
+    },
+
+    productosBusquedaRapida() {
+      return this.productosFiltrados.slice(0, 6)
     },
 
     productoActivo() {
@@ -1584,6 +1623,45 @@ export default {
   gap: 10px;
 }
 
+.catalogQuickStrip{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.catalogQuickResult{
+  border: 1px solid rgba(23,54,47,0.12);
+  background: rgba(255,255,255,0.78);
+  border-radius: 999px;
+  padding: 6px 12px 6px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catalogQuickResult:hover,
+.catalogQuickResult.isActive{
+  transform: translateY(-1px);
+  border-color: rgba(27,94,79,0.24);
+  box-shadow: 0 10px 18px rgba(16, 37, 31, 0.08);
+}
+
+.catalogQuickThumb{
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+
+.catalogQuickResult span{
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
 .catalogSearch span,
 .filterGroup p,
 .metaBlock p,
@@ -1643,9 +1721,29 @@ export default {
 
 .spotlightHeader{
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 260px) minmax(300px, 0.8fr);
   gap: 20px;
   align-items: start;
+}
+
+.spotlightCopy{
+  display: grid;
+  gap: 8px;
+}
+
+.spotlightMedia{
+  overflow: hidden;
+  border-radius: 24px;
+  min-height: 220px;
+  background: rgba(255,255,255,0.68);
+  border: 1px solid rgba(23,54,47,0.08);
+}
+
+.spotlightMedia img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .spotlightHeader h3{
@@ -1711,6 +1809,21 @@ export default {
   padding: 22px;
   cursor: pointer;
   min-height: 220px;
+}
+
+.catalogMedia{
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 22px;
+  aspect-ratio: 4 / 3;
+  background: rgba(255,255,255,0.72);
+}
+
+.catalogMedia img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .catalogCard.isSelected{
@@ -2176,7 +2289,6 @@ export default {
   .heroSection,
   .contactGrid,
   .contactVisual,
-  .spotlightHeader,
   .spotlightMeta,
   .splitBoard{
     grid-template-columns: 1fr;
@@ -2186,6 +2298,14 @@ export default {
   .catalogGrid,
   .solutionGrid{
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spotlightHeader{
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  }
+
+  .spotlightSummary{
+    grid-column: 1 / -1;
   }
 }
 
@@ -2234,6 +2354,10 @@ export default {
   .footerWrap{
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .spotlightHeader{
+    grid-template-columns: 1fr;
   }
 }
 

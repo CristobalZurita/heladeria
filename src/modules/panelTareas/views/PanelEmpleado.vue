@@ -2,12 +2,10 @@
 
 <div class="panelEmpleado">
 
-  <!-- AE1 REQ 1: Interpolación -->
   <h1 class="tituloPanelInterpolado">
     Panel de Tareas de <span class="nombreDestacado">{{ usuario }}</span>
   </h1>
 
-  <!-- AE1 REQ 2 + 3: Estado del día -->
   <div class="bloqueEstadoDia">
 
     <div class="estadoBadge" :class="diaActivo ? 'badge--activo' : 'badge--inactivo'">
@@ -16,6 +14,7 @@
     </div>
 
     <button
+      v-if="esAdmin"
       class="btnEstadoDia"
       :class="diaActivo ? 'btn--cerrar' : 'btn--abrir'"
       @click="cambiarEstado"
@@ -27,7 +26,7 @@
 
   <Resumen
     v-if="mostrarResumen"
-    :totalTareas="tareas.length"
+    :totalTareas="tareasVisibles.length"
     :diaActivo="diaActivo"
     :totalRecetas="totalRecetas"
     :totalProveedores="totalProveedores"
@@ -35,16 +34,20 @@
   />
 
   <div v-if="mostrarAgenda" class="seccion">
-    <AgendaDia :tareas="tareas" />
+    <AgendaDia :tareas="tareasVisibles" />
   </div>
 
-  <!-- AE1 REQ 4: FormTarea usa @submit.prevent + v-model internamente -->
   <div v-if="mostrarTareas" class="seccion">
-    <h2 class="tituloSeccion">✅ Tareas del turno</h2>
-    <FormTarea :diaActivo="diaActivo" @agregar="agregarTarea" @agregarTarea="agregarTarea" />
+    <h2 class="tituloSeccion">{{ esAdmin ? "✅ Asignación de tareas" : "✅ Tareas asignadas" }}</h2>
+    <FormTarea
+      :diaActivo="diaActivo"
+      :soloLectura="!esAdmin"
+      @agregar="agregarTarea"
+      @agregarTarea="agregarTarea"
+    />
   </div>
 
-  <div v-if="mostrarKpi" class="seccion">
+  <div v-if="mostrarKpi && esAdmin" class="seccion">
     <KpiPanel
       :tareas="tareas"
       :diaActivo="diaActivo"
@@ -58,17 +61,17 @@
     />
   </div>
 
-  <!-- AE1 REQ 5 + 6: ListaTareas usa v-for y v-show -->
   <ListaTareas
     v-if="mostrarTareas"
-    :tareas="tareas"
+    :tareas="tareasVisibles"
+    :soloLectura="!esAdmin"
     @toggleCompletar="toggleCompletar"
     @editar="abrirTarea"
     @eliminar="eliminarTarea"
   />
 
-  <!-- AE1 REQ 7: ModalTarea usa @keyup.enter modificador -->
   <ModalTarea
+    v-if="esAdmin"
     :visible="mostrarModal"
     :tarea="tareaSeleccionada"
     @cerrar="cerrarModal"
@@ -96,6 +99,7 @@ export default{
 
 props:{
 usuario:{ type: String, default: "" },
+rol:{ type: String, default: "empleado" },
 vista:{ type: String, default: "panel" }
 },
 
@@ -140,6 +144,20 @@ return this.vista === "panel" || this.vista === "tareas"
 
 mostrarKpi(){
 return this.vista === "panel" || this.vista === "kpi"
+},
+
+esAdmin(){
+return this.rol === "admin"
+},
+
+tareasVisibles(){
+if(this.esAdmin){
+  return this.tareas
+}
+
+return this.tareas.filter((tarea) => {
+  return String(tarea.asignado || "").trim().toLowerCase() === String(this.usuario || "").trim().toLowerCase()
+})
 }
 },
 
@@ -151,31 +169,36 @@ this.cargarResumenOperacion()
 methods:{
 
 cambiarEstado(){
+if(!this.esAdmin) return
 this.diaActivo = !this.diaActivo
 this.persistirEstado()
 },
 
-agregarTarea({ nombre, prioridad }){
+agregarTarea(tareaNueva){
+if(!this.esAdmin) return
 this.tareas.push({
   id: this.nextId++,
-  nombre,
-  prioridad,
-  completada: false
+  ...tareaNueva,
+  completada: tareaNueva.estado === "completada"
 })
 this.persistirEstado()
 },
 
 toggleCompletar(tarea){
+if(!this.esAdmin) return
 tarea.completada = !tarea.completada
+tarea.estado = tarea.completada ? "completada" : "pendiente"
 this.persistirEstado()
 },
 
 eliminarTarea(tarea){
+if(!this.esAdmin) return
 this.tareas = this.tareas.filter(t => t !== tarea)
 this.persistirEstado()
 },
 
 abrirTarea(tarea){
+if(!this.esAdmin) return
 this.tareaSeleccionada = tarea
 this.mostrarModal = true
 },
@@ -186,8 +209,13 @@ this.mostrarModal = false
 },
 
 guardarEdicion(tareaEditada){
+if(!this.esAdmin) return
+const tareaNormalizada = {
+  ...tareaEditada,
+  completada: tareaEditada.estado === "completada"
+}
 const idx = this.tareas.findIndex(t => t.id === tareaEditada.id)
-if(idx !== -1) this.tareas[idx] = { ...tareaEditada }
+if(idx !== -1) this.tareas[idx] = tareaNormalizada
 this.persistirEstado()
 this.cerrarModal()
 },

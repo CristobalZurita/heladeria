@@ -28,7 +28,7 @@ import LogoBosque from "./LogoBosque.vue"
 
 export default{
 
-props:["vistaActiva"],
+props:["vistaActiva","rol"],
 
 emits:["cambiarVista"],
 
@@ -36,16 +36,23 @@ components:{
 LogoBosque
 },
 
-data(){
-return{
-menuItems:[
-{ id:"panel", label:"Panel", icono:"🏠" },
-{ id:"tareas", label:"Tareas", icono:"✅" },
-{ id:"kpi", label:"KPI", icono:"📈" },
-{ id:"imagenes", label:"Imagenes", icono:"🖼" },
-{ id:"stock", label:"Inventario", icono:"📦" },
-{ id:"proveedores", label:"Proveedores", icono:"🤝" }
+computed:{
+menuItems(){
+const menuAdmin = [
+  { id:"panel", label:"Panel", icono:"🏠" },
+  { id:"tareas", label:"Tareas", icono:"✅" },
+  { id:"kpi", label:"KPI", icono:"📈" },
+  { id:"imagenes", label:"Imagenes", icono:"🖼" },
+  { id:"stock", label:"Inventario", icono:"📦" },
+  { id:"proveedores", label:"Proveedores", icono:"🤝" }
 ]
+
+const menuEmpleado = [
+  { id:"panel", label:"Panel", icono:"🏠" },
+  { id:"tareas", label:"Tareas", icono:"✅" }
+]
+
+return this.rol === "admin" ? menuAdmin : menuEmpleado
 }
 }
 

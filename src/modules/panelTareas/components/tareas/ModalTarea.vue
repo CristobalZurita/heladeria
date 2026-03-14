@@ -6,20 +6,64 @@
 
     <h3 class="tituloModal">✏️ Editar tarea</h3>
 
-    <label class="labelModal">Nombre de la tarea</label>
-    <input
-      v-model="nombreLocal"
-      class="inputModal"
-      placeholder="Nombre de la tarea"
-      @keyup.enter="guardar"
-    />
+    <div class="gridModal">
 
-    <label class="labelModal">Prioridad</label>
-    <select v-model="prioridadLocal" class="selectModal">
-      <option value="baja">🟢 Baja</option>
-      <option value="media">🟡 Media</option>
-      <option value="alta">🔴 Alta</option>
-    </select>
+      <div class="campoModal campoModal--full">
+        <label class="labelModal">Nombre de la tarea</label>
+        <input
+          v-model="nombreLocal"
+          class="inputModal"
+          placeholder="Nombre de la tarea"
+          @keyup.enter="guardar"
+        />
+      </div>
+
+      <div class="campoModal">
+        <label class="labelModal">Estado</label>
+        <select v-model="estadoLocal" class="selectModal">
+          <option value="pendiente">Pendiente</option>
+          <option value="en progreso">En progreso</option>
+          <option value="completada">Completada</option>
+        </select>
+      </div>
+
+      <div class="campoModal">
+        <label class="labelModal">Prioridad</label>
+        <select v-model="prioridadLocal" class="selectModal">
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
+
+      <div class="campoModal">
+        <label class="labelModal">Asignado</label>
+        <input
+          v-model="asignadoLocal"
+          class="inputModal"
+          placeholder="Valentina Torres"
+        />
+      </div>
+
+      <div class="campoModal">
+        <label class="labelModal">Inicio</label>
+        <input
+          v-model="fechaInicioLocal"
+          type="date"
+          class="inputModal"
+        />
+      </div>
+
+      <div class="campoModal">
+        <label class="labelModal">Entrega</label>
+        <input
+          v-model="fechaEntregaLocal"
+          type="date"
+          class="inputModal"
+        />
+      </div>
+
+    </div>
 
     <p v-if="error" class="errorModal">⚠️ {{ error }}</p>
 
@@ -36,7 +80,7 @@
 
 <script>
 
-export default{
+export default {
 
 props:{
 visible:{ type: Boolean, default: false },
@@ -45,39 +89,68 @@ tarea:{ type: Object, default: null }
 
 emits:["cerrar","guardar"],
 
-// ── DATOS ──────────────────────────────────────────
 data(){
 return{
 nombreLocal: "",
+estadoLocal: "pendiente",
 prioridadLocal: "media",
+asignadoLocal: "Valentina Torres",
+fechaInicioLocal: "",
+fechaEntregaLocal: "",
 error: ""
 }
 },
 
-// ── WATCHERS ───────────────────────────────────────
 watch:{
-tarea(val){
-  if(val){
-    this.nombreLocal = val.nombre
+tarea:{
+  immediate:true,
+  handler(val){
+    if(!val){
+      this.nombreLocal = ""
+      this.estadoLocal = "pendiente"
+      this.prioridadLocal = "media"
+      this.asignadoLocal = "Valentina Torres"
+      this.fechaInicioLocal = ""
+      this.fechaEntregaLocal = ""
+      this.error = ""
+      return
+    }
+
+    this.nombreLocal = val.nombre || ""
+    this.estadoLocal = val.estado || (val.completada ? "completada" : "pendiente")
     this.prioridadLocal = val.prioridad || "media"
+    this.asignadoLocal = val.asignado || "Valentina Torres"
+    this.fechaInicioLocal = val.fechaInicio || ""
+    this.fechaEntregaLocal = val.fechaEntrega || ""
     this.error = ""
   }
 }
 },
 
-// ── MÉTODOS ────────────────────────────────────────
 methods:{
 
 guardar(){
-if(this.nombreLocal.trim() === ""){
-  this.error = "El nombre no puede estar vacío"
+if(
+  this.nombreLocal.trim() === "" ||
+  this.asignadoLocal.trim() === "" ||
+  this.fechaInicioLocal === "" ||
+  this.fechaEntregaLocal === ""
+){
+  this.error = "Completa tarea, asignado, inicio y entrega."
   return
 }
+
 this.$emit("guardar",{
   ...this.tarea,
   nombre: this.nombreLocal.trim(),
-  prioridad: this.prioridadLocal
+  estado: this.estadoLocal,
+  prioridad: this.prioridadLocal,
+  asignado: this.asignadoLocal.trim(),
+  fechaInicio: this.fechaInicioLocal,
+  fechaEntrega: this.fechaEntregaLocal,
+  completada: this.estadoLocal === "completada"
 })
+
 this.error = ""
 }
 
@@ -89,7 +162,6 @@ this.error = ""
 
 <style scoped>
 
-/* ── OVERLAY ── */
 .modalOverlay{
 position:fixed;
 inset:0;
@@ -98,36 +170,53 @@ display:flex;
 align-items:center;
 justify-content:center;
 z-index:200;
+padding:20px;
 }
 
-/* ── MODAL ── */
 .modal{
 background:white;
 border-radius:16px;
 padding:28px;
 width:100%;
-max-width:420px;
+max-width:540px;
 box-shadow:0 8px 40px rgba(0,0,0,0.2);
 display:flex;
 flex-direction:column;
-gap:10px;
+gap:14px;
 }
 
 .tituloModal{
-font-size:17px;
+font-size:20px;
 font-weight:700;
 color:#1a3d2e;
-margin:0 0 4px;
+margin:0;
+}
+
+.gridModal{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:12px;
+}
+
+.campoModal{
+display:grid;
+gap:6px;
+}
+
+.campoModal--full{
+grid-column:1 / -1;
 }
 
 .labelModal{
-font-size:13px;
-font-weight:600;
-color:#2d9e74;
+font-size:12px;
+font-weight:800;
+letter-spacing:0.12em;
+text-transform:uppercase;
+color:#557566;
 }
 
-/* ── INPUTS ── */
-.inputModal{
+.inputModal,
+.selectModal{
 padding:11px 14px;
 border:2px solid #b6e8d3;
 border-radius:10px;
@@ -140,34 +229,22 @@ width:100%;
 box-sizing:border-box;
 }
 
-.inputModal:focus{
+.inputModal:focus,
+.selectModal:focus{
 border-color:#2d9e74;
 background:#fff;
 }
 
-.selectModal{
-padding:11px 12px;
-border:2px solid #b6e8d3;
-border-radius:10px;
-font-size:14px;
-background:#f9fffe;
-color:#1a3d2e;
-cursor:pointer;
-outline:none;
-width:100%;
-}
-
-/* ── ERROR ── */
 .errorModal{
 color:#e05a00;
 font-size:13px;
+margin:0;
 }
 
-/* ── BOTONES ── */
 .modalBotones{
 display:flex;
 gap:10px;
-margin-top:6px;
+margin-top:2px;
 }
 
 .btnGuardar{
@@ -201,6 +278,20 @@ transition:0.2s;
 
 .btnCancelar:hover{
 background:#e0e0e0;
+}
+
+@media (max-width: 640px){
+  .modal{
+    padding:22px;
+  }
+
+  .gridModal{
+    grid-template-columns:1fr;
+  }
+
+  .modalBotones{
+    flex-direction:column;
+  }
 }
 
 </style>

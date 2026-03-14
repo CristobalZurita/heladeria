@@ -3,6 +3,18 @@ import { proveedores as proveedoresBase } from "../data/proveedores.js"
 
 const STORAGE_KEY_STOCK = "bosque_helado_stock"
 const STORAGE_KEY_PROVEEDORES = "bosque_helado_proveedores"
+const MARCADORES_IMAGEN_LEGACY = [
+  "galeria-frutos",
+  "galeria-lacteos",
+  "galeria-aplicacion",
+  "galeria-proceso",
+  "materias-primas-raw",
+  "materias-primas.jpg",
+  "materias-primas-nueva",
+  "insumo-frambuesa",
+  "insumo-lacteo",
+  "insumo-cacao"
+]
 
 function clonarLista(lista) {
   return JSON.parse(JSON.stringify(lista))
@@ -28,11 +40,22 @@ function tieneValor(valor) {
   return valor !== undefined && valor !== null
 }
 
+function esImagenLegacyProducto(valor) {
+  const texto = String(valor || "").toLowerCase()
+  if (texto === "") return false
+  return MARCADORES_IMAGEN_LEGACY.some((item) => texto.includes(item))
+}
+
 function fusionarConFallback(actual, fallback) {
   const combinado = { ...fallback }
 
   Object.keys(actual).forEach((key) => {
     const valorActual = actual[key]
+    if ((key === "cloudinary_url" || key === "thumbnail_url") && esImagenLegacyProducto(valorActual)) {
+      combinado[key] = fallback[key]
+      return
+    }
+
     combinado[key] = tieneValor(valorActual) ? valorActual : fallback[key]
   })
 

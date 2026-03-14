@@ -2,35 +2,48 @@
 
 <div class="tareaCard" :class="{ 'card--completada': tarea.completada }">
 
-  <div class="cardIzq">
-    <span class="numTarea">#{{ numero }}</span>
-    <span class="textoTarea" :style="{ textDecoration: tarea.completada ? 'line-through' : 'none' }">
-      {{ tarea.nombre }}
-    </span>
-  </div>
+  <div class="cardContenido">
 
-  <div class="cardDer">
+    <div class="cardCabecera">
+      <div class="cardIzq">
+        <span class="numTarea">#{{ numero }}</span>
+        <span class="textoTarea" :style="{ textDecoration: tarea.completada ? 'line-through' : 'none' }">
+          {{ tarea.nombre }}
+        </span>
+      </div>
 
-    <!-- Badge prioridad -->
-    <span class="prioridadBadge" :class="'prio--' + tarea.prioridad">
-      {{ tarea.prioridad }}
-    </span>
+      <div class="cardDer">
 
-    <!-- Botón completar -->
-    <button
-      class="btnCompletar"
-      :class="tarea.completada ? 'btn--deshacer' : 'btn--completar'"
-      @click="$emit('toggleCompletar', tarea)"
-      :title="tarea.completada ? 'Deshacer' : 'Completar'"
-    >
-      {{ tarea.completada ? "↩" : "✓" }}
-    </button>
+        <span class="estadoBadge" :class="'estado--' + normalizarEstadoClase">
+          {{ tarea.estado || (tarea.completada ? "completada" : "pendiente") }}
+        </span>
 
-    <!-- Botón editar -->
-    <button class="btnEditar" @click="$emit('editar', tarea)" title="Editar">✏️</button>
+        <span class="prioridadBadge" :class="'prio--' + tarea.prioridad">
+          {{ tarea.prioridad }}
+        </span>
 
-    <!-- Botón eliminar -->
-    <button class="btnEliminar" @click="$emit('eliminar', tarea)" title="Eliminar">✕</button>
+        <template v-if="!soloLectura">
+          <button
+            class="btnCompletar"
+            :class="tarea.completada ? 'btn--deshacer' : 'btn--completar'"
+            @click="$emit('toggleCompletar', tarea)"
+            :title="tarea.completada ? 'Deshacer' : 'Completar'"
+          >
+            {{ tarea.completada ? "↩" : "✓" }}
+          </button>
+
+          <button class="btnEditar" @click="$emit('editar', tarea)" title="Editar">✏️</button>
+          <button class="btnEliminar" @click="$emit('eliminar', tarea)" title="Eliminar">✕</button>
+        </template>
+
+      </div>
+    </div>
+
+    <div class="metaFila">
+      <span class="metaDato"><strong>Asignado:</strong> {{ tarea.asignado || "Valentina Torres" }}</span>
+      <span class="metaDato"><strong>Inicio:</strong> {{ tarea.fechaInicio || "--" }}</span>
+      <span class="metaDato"><strong>Entrega:</strong> {{ tarea.fechaEntrega || "--" }}</span>
+    </div>
 
   </div>
 
@@ -44,10 +57,20 @@ export default{
 
 props:{
 tarea:{ type: Object, required: true },
-numero:{ type: Number, required: true }
+numero:{ type: Number, required: true },
+soloLectura:{ type: Boolean, default: false }
 },
 
-emits:["toggleCompletar","editar","eliminar"]
+emits:["toggleCompletar","editar","eliminar"],
+
+computed:{
+normalizarEstadoClase(){
+  return String(this.tarea.estado || "pendiente")
+    .trim()
+    .toLowerCase()
+    .replaceAll(" ", "-")
+}
+}
 
 }
 
@@ -55,12 +78,7 @@ emits:["toggleCompletar","editar","eliminar"]
 
 <style scoped>
 
-/* ── CARD ── */
 .tareaCard{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:12px;
 background:white;
 border:1px solid #b6e8d3;
 border-radius:12px;
@@ -80,7 +98,20 @@ border-color:#d4f5e5;
 opacity:0.75;
 }
 
-/* ── IZQUIERDA ── */
+.cardContenido{
+display:flex;
+flex-direction:column;
+gap:10px;
+width:100%;
+}
+
+.cardCabecera{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+}
+
 .cardIzq{
 display:flex;
 align-items:center;
@@ -102,21 +133,47 @@ color:#1a3d2e;
 word-break:break-word;
 }
 
-/* ── DERECHA ── */
 .cardDer{
 display:flex;
 align-items:center;
-gap:6px;
+gap:8px;
+flex-wrap:wrap;
 flex-shrink:0;
 }
 
-/* ── PRIORIDAD BADGE ── */
+.metaFila{
+display:flex;
+gap:16px;
+flex-wrap:wrap;
+}
+
+.metaDato{
+font-size:13px;
+color:#557566;
+}
+
+.estadoBadge,
 .prioridadBadge{
 padding:3px 10px;
 border-radius:50px;
 font-size:11px;
 font-weight:700;
 text-transform:capitalize;
+}
+
+.estado--pendiente{
+background:#fff3d0;
+color:#a06000;
+}
+
+.estado--en-progreso{
+background:#dff0ff;
+color:#1765a3;
+}
+
+.estado--completada{
+background:#e0f8ed;
+color:#1a6b52;
 }
 
 .prio--alta{
@@ -134,7 +191,6 @@ background:#e0f8ed;
 color:#1a6b52;
 }
 
-/* ── BOTONES ── */
 .btnCompletar,
 .btnDeshacer,
 .btnEditar,
@@ -185,6 +241,22 @@ color:#e05a00;
 .btnEliminar:hover{
 background:#e05a00;
 color:white;
+}
+
+@media (max-width: 720px){
+  .cardCabecera{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .cardDer{
+    width:100%;
+  }
+
+  .metaFila{
+    gap:8px;
+    flex-direction:column;
+  }
 }
 
 </style>
